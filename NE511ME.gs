@@ -15,8 +15,7 @@ function NE511_ME_incidentData_XmlFeed_to_Discord() {
 
   // URL of the XML source
   var url = 'https://nec-por.ne-compass.com/XmlDataPortalV2/api/c2c?networks=Maine&dataTypes=incidentData'; // New URL updated 3-25-2024
-  var me_webohok = 'https://discord.com/api/webhooks/567553019839905792/tpeknm1u_Lx6QeA1ikYPoZYQA7n07lPThonHqTbeD59v_apBKkar5_ML1xxCUeS7m5XY'; // NER --> ME --> ME Twitter --> NE 511 Webhook
-  //var me_webohok = 'https://discord.com/api/webhooks/1131294055955959918/9oM-xAliEBHqvOEmvCcffg0rQgq4V60umDfey-FPaZ5gkGtEp8Mgh6jy1eX0KN2EbAt8';    //JS55CT-->mass-vt-511-test
+  var me_webohok = 'ENTER_WEBHOOK_URL_HERE';
 
   // Fetch the XML Data
   //var response = UrlFetchApp.fetch(url);
