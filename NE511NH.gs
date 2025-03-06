@@ -1,22 +1,23 @@
-function process_NE511_ME_XmlFeed_to_Discord() {
-  NE511_ME_incidentData_XmlFeed_to_Discord();
-  NE511_ME_laneClosureData_XmlFeed_to_Discord();
+function process_NE511_NH_XmlFeed_to_Discord() {
+  NE511_NH_incidentData_XmlFeed_to_Discord();
+  NE511_NH_laneClosureData_XmlFeed_to_Discord();
 }
+
 //Pass anything with the following key words.
-var postPatternME = /\b(closed|closure|blocked|blocking|flooded|tree in|water over|shut\s+down|all\s+lanes|both\s+lanes|across\s+the\s+(road|street))\b/i
+var postPatternNH = /\b(closed|closure|blocked|blocking|flooded|tree in|water over|shut\s+down|all\s+lanes|both\s+lanes|across\s+the\s+(road|street))\b/i
 
 // Then filter out anything that is Lane spacific.
-var exclusionPatternME = /(?:\b(Lane\s+(1|2|3|4|one|two|three|four))|((Right|Left|Center|ORT|EZ\s+PASS|EZPASS|cash|shoulder|median|1|one|2|two|3|three|Right\s+Turn|Left\s+Turn)\s+lane(s)?|(shoulder|median))\s+(is\s+|are\s+)?(currently\s+)?(closed|closure|blocked)|Closed\s+temporarily|\b(one|1|two|2)\s+(northbound|southbound|eastbound|westbound|NB|SB|EB|WB)\s+lane\s+(is\s+|are\s+)?(currently\s+)?(closed|blocked)|closed\s+to\s+(one|1|two|2|Marine\s+traffic)\s+lane|down\s+to\s+(one|1|two|2)\s+Lane|closed\s+to\s+Marine\s+traffic|(?:a|single|multiple|rolling)?\s*lane\s+closures?|rolling\s+closure|rolling\s+roadblock)\b/i;
+var exclusionPatternNH = /(?:\b(Lane\s+(1|2|3|4|one|two|three|four))|((Right|Left|Center|ORT|EZ\s+PASS|EZPASS|cash|shoulder|median|1|one|2|two|3|three|Right\s+Turn|Left\s+Turn)\s+lane(s)?|(shoulder|median))\s+(is\s+|are\s+)?(currently\s+)?(closed|closure|blocked)|Closed\s+temporarily|\b(one|1|two|2)\s+(northbound|southbound|eastbound|westbound|NB|SB|EB|WB)\s+lane\s+(is\s+|are\s+)?(currently\s+)?(closed|blocked)|closed\s+to\s+(one|1|two|2|Marine\s+traffic)\s+lane|down\s+to\s+(one|1|two|2)\s+Lane|closed\s+to\s+Marine\s+traffic|(?:a|single|multiple|rolling)?\s*lane\s+closures?|rolling\s+closure|rolling\s+roadblock)\b/i;
 
-function NE511_ME_incidentData_XmlFeed_to_Discord() {
+function NE511_NH_incidentData_XmlFeed_to_Discord() {
   // Initialize counters
   var postedCount = 0;
   var skippedCount = 0;
 
   // URL of the XML source
-  var url = 'https://nec-por.ne-compass.com/XmlDataPortalV2/api/c2c?networks=Maine&dataTypes=incidentData'; // New URL updated 3-25-2024
-  var me_webohok = 'https://discord.com/api/webhooks/567553019839905792/tpeknm1u_Lx6QeA1ikYPoZYQA7n07lPThonHqTbeD59v_apBKkar5_ML1xxCUeS7m5XY'; // NER --> ME --> ME Twitter --> NE 511 Webhook
-  //var me_webohok = 'https://discord.com/api/webhooks/1131294055955959918/9oM-xAliEBHqvOEmvCcffg0rQgq4V60umDfey-FPaZ5gkGtEp8Mgh6jy1eX0KN2EbAt8';    //JS55CT-->mass-vt-511-test
+  var url = 'https://nec-por.ne-compass.com/XmlDataPortalV2/api/c2c?networks=NewHampshire&dataTypes=incidentData'; // New URL updated 3-25-2024
+  var nh_webohok = 'https://discord.com/api/webhooks/567553604580540416/ee_Ok49w_fxG4KamclddwjGV_mlVrfgpx5lU7UGhPmiwq6axgZigSiWRAQf1wYW1Ofvk'; // NER --> NH --> NH Twitter --> NE 511 Webhook
+  //var nh_webohok = 'https://discord.com/api/webhooks/1131294055955959918/9oM-xAliEBHqvOEmvCcffg0rQgq4V60umDfey-FPaZ5gkGtEp8Mgh6jy1eX0KN2EbAt8';    //JS55CT-->mass-vt-511-test
 
   // Fetch the XML Data
   //var response = UrlFetchApp.fetch(url);
@@ -51,6 +52,7 @@ function NE511_ME_incidentData_XmlFeed_to_Discord() {
     return;
   }
 
+
   // Parse fetched XML data into a document
   var xmlData = response.getContentText();
 
@@ -76,7 +78,7 @@ function NE511_ME_incidentData_XmlFeed_to_Discord() {
   Logger.log('Number of incidents: ' + incidents.length);
 
   // Retrieve the last run time of the script from properties or use 0 if it's the first time
-  var lastRunTime = PropertiesService.getScriptProperties().getProperty('NE_511_ME_incidentData_lastRunTime');
+  var lastRunTime = PropertiesService.getScriptProperties().getProperty('NE_511_NH_incidentData_lastRunTime');
   lastRunTime = lastRunTime ? new Date(lastRunTime) : new Date(0);
 
   // Get the current time
@@ -109,15 +111,14 @@ function NE511_ME_incidentData_XmlFeed_to_Discord() {
 
     // Only process the incidents that start after the last script run time and are not future-dated or have not been posted before
     if ((createdTime > lastRunTime)) {
-
       // Get the incident description
       var description = incident.getChild('desc', ns).getText();
       if (!description) return;
 
       // Check if it matches the post pattern
-      if (postPatternME.test(description)) {
+      if (postPatternNH.test(description)) {
         // Now check for exclusion criteria
-        if (exclusionPatternME.test(description)) {
+        if (exclusionPatternNH.test(description)) {
           Logger.log('Incident ID: ' + id + ' Created Time: ' + createdTime + ' Skipped due to exclusion: ' + description);
           skippedCount++;
           return;
@@ -160,6 +161,7 @@ function NE511_ME_incidentData_XmlFeed_to_Discord() {
         var city = startLocation ? startLocation.getChild('city', ns).getText() : '[Unknown]';
         var type = incident.getChild('eventType', ns).getText();
 
+
         // Format the start and end times for display in Discord message body
         var timezone = 'America/New_York';
         var format = "MMM dd, yyyy HH:mm a 'ET'";
@@ -193,10 +195,9 @@ function NE511_ME_incidentData_XmlFeed_to_Discord() {
           descriptionText += `[WME:Ending point](${wmelastPairUrl})`;
         }
 
-
         // Construct the payload message for Discord
         var payload = JSON.stringify({
-          username: 'NE 511 - Maine',
+          username: 'NE 511 - New Hampshire',
           avatar_url: 'https://newengland511.org/Content/NE/Images/New-England-Logo.png',
           content: '',
           tts: false,
@@ -209,7 +210,7 @@ function NE511_ME_incidentData_XmlFeed_to_Discord() {
             thumbnail: {
               url: 'https://newengland511.org/Content/NE/Images/New-England-Logo.png',
             },
-            url: `https://newengland511.org/map#Incidents-Maine511Incident--${id}`,
+            url: `https://newengland511.org/map#Incidents-NewHampshire511Incident--${id}`,
             author: {
               name: 'New England 511',
               url: 'https://newengland511.org/',
@@ -231,8 +232,7 @@ function NE511_ME_incidentData_XmlFeed_to_Discord() {
           muteHttpExceptions: true,
           contentType: "application/json"
         };
-
-        UrlFetchApp.fetch(me_webohok, params);
+        UrlFetchApp.fetch(nh_webohok, params);
         Logger.log('incident ID: ' + id + ' Created Time: ' + createdTime + ' Posted: ' + description)
         postedCount++;
 
@@ -250,21 +250,22 @@ function NE511_ME_incidentData_XmlFeed_to_Discord() {
   Logger.log('Skipped incidents: ' + skippedCount);
 
   // Store the current time as the last run time
-  PropertiesService.getScriptProperties().setProperty('NE_511_ME_incidentData_lastRunTime', currentTime.toISOString());
+  PropertiesService.getScriptProperties().setProperty('NE_511_NH_incidentData_lastRunTime', currentTime.toISOString());
 }
 
-function NE511_ME_laneClosureData_XmlFeed_to_Discord() {
+function NE511_NH_laneClosureData_XmlFeed_to_Discord() {
   // Initialize counters
   var postedCount = 0;
   var skippedCount = 0;
 
   // URL of the XML source
-  var url = 'https://nec-por.ne-compass.com/XmlDataPortalV2/api/c2c?networks=Maine&dataTypes=laneClosureData'; // New URL updated 3-25-2024
-  var me_webohok = 'https://discord.com/api/webhooks/567553019839905792/tpeknm1u_Lx6QeA1ikYPoZYQA7n07lPThonHqTbeD59v_apBKkar5_ML1xxCUeS7m5XY'; // NER --> ME --> ME Twitter --> NE 511 Webhook
-  //var me_webohok = 'https://discord.com/api/webhooks/1131294055955959918/9oM-xAliEBHqvOEmvCcffg0rQgq4V60umDfey-FPaZ5gkGtEp8Mgh6jy1eX0KN2EbAt8';    //JS55CT-->mass-vt-511-test
+  var url = 'https://nec-por.ne-compass.com/XmlDataPortalV2/api/c2c?networks=NewHampshire&dataTypes=laneClosureData'; // New URL updated 3-25-2024
+  var nh_webohok = 'https://discord.com/api/webhooks/567553604580540416/ee_Ok49w_fxG4KamclddwjGV_mlVrfgpx5lU7UGhPmiwq6axgZigSiWRAQf1wYW1Ofvk'; // NER --> NH --> NH Twitter --> NE 511 Webhook
+  //var nh_webohok = 'https://discord.com/api/webhooks/1131294055955959918/9oM-xAliEBHqvOEmvCcffg0rQgq4V60umDfey-FPaZ5gkGtEp8Mgh6jy1eX0KN2EbAt8';    //JS55CT-->mass-vt-511-test
 
   // Fetch the XML Data
   //var response = UrlFetchApp.fetch(url);
+
   // Fetch the XML Data with error logging and retry logic
   var maxRetries = 3;  // Maximum number of retry attempts
   var retryCount = 0;  // Initialize retry counter
@@ -322,7 +323,7 @@ function NE511_ME_laneClosureData_XmlFeed_to_Discord() {
   Logger.log('Number of incidents: ' + incidents.length);
 
   // Retrieve the last run time of the script from properties or use 0 if it's the first time
-  var lastRunTime = PropertiesService.getScriptProperties().getProperty('NE_511_ME_laneClosureData_lastRunTime');
+  var lastRunTime = PropertiesService.getScriptProperties().getProperty('NE_511_NH_laneClosureData_lastRunTime');
   lastRunTime = lastRunTime ? new Date(lastRunTime) : new Date(0);
 
   // Get the current time
@@ -360,9 +361,9 @@ function NE511_ME_laneClosureData_XmlFeed_to_Discord() {
       if (!description) return;
 
       // Check if it matches the post pattern
-      if (postPatternME.test(description)) {
+      if (postPatternNH.test(description)) {
         // Now check for exclusion criteria
-        if (exclusionPatternME.test(description)) {
+        if (exclusionPatternNH.test(description)) {
           Logger.log('Incident ID: ' + id + ' Created Time: ' + createdTime + ' Skipped due to exclusion: ' + description);
           skippedCount++;
           return;
@@ -494,7 +495,7 @@ function NE511_ME_laneClosureData_XmlFeed_to_Discord() {
 
         // Construct the payload message for Discord
         var payload = JSON.stringify({
-          username: 'NE 511 - Maine',
+          username: 'NE 511 - New Hampshire',
           avatar_url: 'https://newengland511.org/Content/NE/Images/New-England-Logo.png',
           content: '',
           tts: false,
@@ -507,7 +508,7 @@ function NE511_ME_laneClosureData_XmlFeed_to_Discord() {
             thumbnail: {
               url: 'https://newengland511.org/Content/NE/Images/New-England-Logo.png',
             },
-            url: `https://newengland511.org/map#ConstructionClosures-Maine511Closure--${id}`,
+            url: `https://newengland511.org/map#ConstructionClosures-NewHampshire511Closure--${id}`,
             author: {
               name: 'New England 511',
               url: 'https://newengland511.org/',
@@ -529,11 +530,10 @@ function NE511_ME_laneClosureData_XmlFeed_to_Discord() {
           muteHttpExceptions: true,
           contentType: "application/json"
         };
-
-        UrlFetchApp.fetch(me_webohok, params);
+        UrlFetchApp.fetch(nh_webohok, params);
         Logger.log('incident ID: ' + id + ' Created Time: ' + createdTime + ' Posted: ' + description)
-
         postedCount++;
+
       } else {
         Logger.log('Incident ID: ' + id + ' Created Time: ' + createdTime + ' No match for post pattern: ' + description);
         skippedCount++;
@@ -547,11 +547,6 @@ function NE511_ME_laneClosureData_XmlFeed_to_Discord() {
   Logger.log('Posted incidents: ' + postedCount);
   Logger.log('Skipped incidents: ' + skippedCount);
 
-  // Replace the futureStartIds in PropertiesService with the IDs for incidents with a start time in the future
-  //PropertiesService.getScriptProperties().setProperty('NE_511_VT_laneClosureData_futureStartIds', JSON.stringify(currentFutureIds));
-
-  //Logger.log('Total future incidents rolling over to next run: ' + Object.keys(currentFutureIds).length);
-
   // Store the current time as the last run time
-  PropertiesService.getScriptProperties().setProperty('NE_511_ME_laneClosureData_lastRunTime', currentTime.toISOString());
+  PropertiesService.getScriptProperties().setProperty('NE_511_NH_laneClosureData_lastRunTime', currentTime.toISOString());
 }
