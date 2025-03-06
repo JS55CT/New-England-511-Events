@@ -15,10 +15,41 @@ function NE511_ME_incidentData_XmlFeed_to_Discord() {
 
   // URL of the XML source
   var url = 'https://nec-por.ne-compass.com/XmlDataPortalV2/api/c2c?networks=Maine&dataTypes=incidentData'; // New URL updated 3-25-2024
-  var me_webohok = 'ENTER_WEBHOOK_URL_HERE'
+  var me_webohok = 'https://discord.com/api/webhooks/567553019839905792/tpeknm1u_Lx6QeA1ikYPoZYQA7n07lPThonHqTbeD59v_apBKkar5_ML1xxCUeS7m5XY'; // NER --> ME --> ME Twitter --> NE 511 Webhook
+  //var me_webohok = 'https://discord.com/api/webhooks/1131294055955959918/9oM-xAliEBHqvOEmvCcffg0rQgq4V60umDfey-FPaZ5gkGtEp8Mgh6jy1eX0KN2EbAt8';    //JS55CT-->mass-vt-511-test
 
   // Fetch the XML Data
-  var response = UrlFetchApp.fetch(url);
+  //var response = UrlFetchApp.fetch(url);
+  // Fetch the XML Data with error logging and retry logic
+  var maxRetries = 3;  // Maximum number of retry attempts
+  var retryCount = 0;  // Initialize retry counter
+  var response = null;
+
+  while (retryCount < maxRetries) {
+    try {
+      response = UrlFetchApp.fetch(url);
+      var responseCode = response.getResponseCode();
+
+      if (responseCode === 200) {  // Check if the response code is 200 (OK)
+        Logger.log('Successfully fetched XML data on attempt ' + (retryCount + 1));
+        break;  // Exit the loop if fetch is successful
+      } else {
+        Logger.log('Non-success HTTP response code: ' + responseCode);
+        retryCount++;
+        Logger.log('Retrying fetch...');
+      }
+    } catch (error) {
+      Logger.log('Attempt ' + (retryCount + 1) + ' to fetch XML data failed: ' + error.toString());
+      retryCount++;
+      Logger.log('Retrying fetch...');
+    }
+  }
+
+  // If response is null after retries, return from function
+  if (response === null || response.getResponseCode() !== 200) {
+    Logger.log('Fetch failed after maximum retries or did not receive a valid response. Exiting function.');
+    return;
+  }
 
   // Parse fetched XML data into a document
   var xmlData = response.getContentText();
@@ -229,10 +260,42 @@ function NE511_ME_laneClosureData_XmlFeed_to_Discord() {
 
   // URL of the XML source
   var url = 'https://nec-por.ne-compass.com/XmlDataPortalV2/api/c2c?networks=Maine&dataTypes=laneClosureData'; // New URL updated 3-25-2024
-  var me_webohok = 'ENTER_WEBHOOK_URL_HERE'; // NER --> ME --> ME Twitter --> NE 511 Webhook
+  var me_webohok = 'https://discord.com/api/webhooks/567553019839905792/tpeknm1u_Lx6QeA1ikYPoZYQA7n07lPThonHqTbeD59v_apBKkar5_ML1xxCUeS7m5XY'; // NER --> ME --> ME Twitter --> NE 511 Webhook
+  //var me_webohok = 'https://discord.com/api/webhooks/1131294055955959918/9oM-xAliEBHqvOEmvCcffg0rQgq4V60umDfey-FPaZ5gkGtEp8Mgh6jy1eX0KN2EbAt8';    //JS55CT-->mass-vt-511-test
 
   // Fetch the XML Data
-  var response = UrlFetchApp.fetch(url);
+  //var response = UrlFetchApp.fetch(url);
+  // Fetch the XML Data with error logging and retry logic
+  var maxRetries = 3;  // Maximum number of retry attempts
+  var retryCount = 0;  // Initialize retry counter
+  var response = null;
+
+  while (retryCount < maxRetries) {
+    try {
+      response = UrlFetchApp.fetch(url);
+      var responseCode = response.getResponseCode();
+
+      if (responseCode === 200) {  // Check if the response code is 200 (OK)
+        Logger.log('Successfully fetched XML data on attempt ' + (retryCount + 1));
+        break;  // Exit the loop if fetch is successful
+      } else {
+        Logger.log('Non-success HTTP response code: ' + responseCode);
+        retryCount++;
+        Logger.log('Retrying fetch...');
+      }
+    } catch (error) {
+      Logger.log('Attempt ' + (retryCount + 1) + ' to fetch XML data failed: ' + error.toString());
+      retryCount++;
+      Logger.log('Retrying fetch...');
+    }
+  }
+
+  // If response is null after retries, return from function
+  if (response === null || response.getResponseCode() !== 200) {
+    Logger.log('Fetch failed after maximum retries or did not receive a valid response. Exiting function.');
+    return;
+  }
+
 
   // Parse fetched XML data into a document
   var xmlData = response.getContentText();
